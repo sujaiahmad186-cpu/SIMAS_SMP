@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMAS - Sistem Manajemen Administrasi Sekolah</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Times New Roman Serif setup -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .bg-simas-green {
+            background-color: #208ed3;
+        }
+        .text-simas-green {
+            color: #1397cc;
+        }
+        .border-simas-green {
+            border-color: #208ed3;
+        }
+        .bg-simas-sidebar {
+            background-color: #208ed3;
+        }
+        .bg-simas-active {
+            background-color: #2563eb !important;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #07100a;
+            border-radius: 4px;
+        }
+        
+        /* Format Kertas F4 / A4 untuk Cetak & Pratinjau Surat - Default Times New Roman */
+        .f4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding-top: 3cm !important;
+            padding-right: 3cm !important;
+            padding-bottom: 3cm !important;
+            padding-left: 4cm !important;
+            font-family: 'Times New Roman', Times, serif !important;
+            font-size: 12pt;
+            line-height: 1.15;
+            text-align: justify;
+            box-sizing: border-box;
+        }
+
+        .letter-content, .letter-content * {
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        .letter-content p {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .letter-content p.text-center,
+        .letter-content .text-center p {
+            text-align: center !important;
+        }
+
+        .letter-signature, .letter-signature * {
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        @media print {
+            @page {
+                size: auto;
+                margin: 0;
+            }
+            body {
+                background: white !important;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #printable-letter, #printable-letter *,
+            #pdf-print-area, #pdf-print-area * {
+                visibility: visible;
+            }
+            #printable-letter {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding-top: 3cm !important;
+                padding-right: 3cm !important;
+                padding-bottom: 3cm !important;
+                padding-left: 4cm !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-simas-sidebar text-white flex flex-col flex-shrink-0 z-20 shadow-lg select-none">
+        <!-- Logo & Header -->
+        <div class="p-4 flex items-center gap-3 border-b border-green-700/50">
+            <div class="bg-white text-simas-green p-2 rounded-xl shadow-md flex items-center justify-center">
+                <i class="fa-solid fa-layer-group text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl leading-tight tracking-wide">SIMAS</h1>
+                <p class="text-[10px] text-green-100 font-medium">Sistem Manajemen Administrasi Sekolah</p>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            <div class="space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 bg-simas-active text-white shadow-sm">
+                    <i class="fa-solid fa-house w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('profil')" id="nav-profil" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-green-700/60 text-green-50">
+                    <i class="fa-solid fa-school-flag w-5 text-center"></i>
+                    <span>Profil Sekolah</span>
+                </button>
+            </div>
+
+            <div>
+                <p class="px-4 text-[11px] font-bold text-green-200 uppercase tracking-wider mb-2">MANAJEMEN SURAT</p>
+                <div class="space-y-1">
+                    <button onclick="switchTab('buat-surat')" id="nav-buat-surat" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-green-700/60 text-green-50">
+                        <i class="fa-solid fa-file-signature w-5 text-center"></i>
+                        <span>Buat Surat Keluar</span>
+                    </button>
+                    <button onclick="switchTab('surat-masuk')" id="nav-surat-masuk" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-green-700/60 text-green-50">
+                        <i class="fa-solid fa-inbox w-5 text-center"></i>
+                        <span>Surat Masuk</span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <p class="px-4 text-[11px] font-bold text-green-200 uppercase tracking-wider mb-2">ARSIP & PENGATURAN</p>
+                <div class="space-y-1">
+                    <button onclick="switchTab('arsip')" id="nav-arsip" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-green-700/60 text-green-50">
+                        <i class="fa-solid fa-box-archive w-5 text-center"></i>
+                        <span>Arsip Digital</span>
+                    </button>
+                    <button onclick="switchTab('pegawai')" id="nav-pegawai" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-green-700/60 text-green-50">
+                        <i class="fa-solid fa-id-card-clip w-5 text-center"></i>
+                        <span>Data Pegawai</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-green-700/50 space-y-1">
+                <button onclick="showToast('Tutorial penggunaan SIMAS dapat diunduh di panduan pengguna.', 'info')" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-medium text-green-100 hover:text-white hover:bg-green-700/40 rounded-lg">
+                    <i class="fa-solid fa-book-open w-5 text-center"></i>
+                    <span>Tutorial</span>
+                </button>
+                <button onclick="showToast('Pertanyaan umum: SIMAS mendukung integrasi Google Sheets secara realtime.', 'info')" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-medium text-green-100 hover:text-white hover:bg-green-700/40 rounded-lg">
+                    <i class="fa-solid fa-circle-question w-5 text-center"></i>
+                    <span>Pertanyaan Umum</span>
+                </button>
+                <button onclick="openGasModal()" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-medium text-green-100 hover:text-white hover:bg-green-700/40 rounded-lg">
+                    <i class="fa-solid fa-cloud-arrow-up w-5 text-center text-amber-300"></i>
+                    <span class="text-amber-200 font-semibold">Integrasi Google Script</span>
+                </button>
+                <button onclick="checkAppUpdates()" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-medium text-green-100 hover:text-white hover:bg-green-700/40 rounded-lg">
+                    <i class="fa-solid fa-rotate w-5 text-center"></i>
+                    <span>Periksa Pembaruan</span>
+                </button>
+                <button onclick="openAboutModal()" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-medium text-green-100 hover:text-white hover:bg-green-700/40 rounded-lg">
+                    <i class="fa-solid fa-circle-info w-5 text-center"></i>
+                    <span>Tentang SIMAS</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 text-center border-t border-green-700/50">
+            <p class="text-[10px] tracking-widest font-mono text-green-200">SIMAS DESKTOP V.1.0</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="bg-simas-green text-white px-6 py-3 flex items-center justify-between shadow-md z-10">
+            <h2 id="top-bar-title" class="text-lg font-bold">Dashboard Overview</h2>
+            
+            <div class="flex items-center gap-4">
+                <div id="gas-sync-status" onclick="openGasModal()" class="cursor-pointer text-xs bg-emerald-800/80 hover:bg-emerald-800 px-3 py-1.5 rounded-full border border-emerald-500/50 flex items-center gap-2 transition">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="status-dot"></span>
+                    <span id="status-text" class="text-emerald-100 font-medium">Lokal (Klik hubungkan Apps Script)</span>
+                </div>
+
+                <div class="flex items-center gap-2 bg-emerald-800/60 hover:bg-emerald-800 px-3 py-1.5 rounded-full border border-emerald-500/30 cursor-pointer">
+                    <div class="w-7 h-7 rounded-full bg-amber-400 text-emerald-950 font-bold flex items-center justify-center text-xs shadow-inner">
+                        T
+                    </div>
+                    <span class="text-xs font-semibold text-white">Tata Usaha</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-emerald-200 ml-1"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            <!-- 1. DASHBOARD VIEW -->
+            <div id="page-dashboard" class="page-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <p id="dashboard-date" class="text-sm font-medium text-slate-500 mb-1">Selasa, 11 Agustus 2026</p>
+                            <h3 class="text-2xl font-bold text-slate-800">Selamat Datang di SIMAS</h3>
+                            <p class="text-slate-500 text-sm mt-1">Sistem Manajemen Administrasi Sekolah.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
+                        <div class="flex items-center gap-2 text-slate-500 text-xs font-semibold tracking-wider uppercase mb-2">
+                            <i class="fa-regular fa-clock text-blue-600 text-sm"></i>
+                            <span>Jam Digital</span>
+                        </div>
+                        <div id="live-clock" class="text-4xl font-extrabold text-blue-600 tracking-tight font-mono">
+                            00.00.00
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-600 text-white p-3 rounded-xl shadow-md flex items-center justify-center">
+                            <i class="fa-solid fa-school-flag text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-lg">Profil Sekolah</h4>
+                    </div>
+
+                    <div class="flex items-center gap-6 flex-wrap justify-center md:justify-start">
+                        <div class="flex items-center gap-3">
+                            <img id="dash-logo-kiri" src="https://cdn.phototourl.com/free/2026-07-25-07652bbf-d325-4bf9-b.png" alt="Logo Yayasan" class="h-14 w-auto object-contain" onerror="this.src='https://placehold.co/100x100/157e31/ffffff?text=Yayasan'">
+                                        </div>
+
+                        <div>
+                            <h3 id="dash-nama-sekolah" class="font-extrabold text-slate-900 text-lg tracking-tight uppercase">SMP ISLAM AS SHOFI</h3>
+                            <p class="text-xs text-slate-600">NPSN: <span id="dash-npsn" class="font-semibold text-slate-800">50220334</span></p>
+                            <p class="text-xs text-slate-600">Kepala Sekolah: <span id="dash-kepala" class="font-bold text-slate-900"> YUDI SETIAWAN, S.Pd</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div onclick="switchTab('surat-masuk')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex items-center gap-4 group">
+                        <div class="bg-blue-600 text-white p-3.5 rounded-xl group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-inbox text-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800 text-sm">Surat Masuk</h5>
+                            <p class="text-[11px] text-slate-500">Tambah & Kelola Surat Masuk</p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('buat-surat')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex items-center gap-4 group">
+                        <div class="bg-emerald-600 text-white p-3.5 rounded-xl group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-paper-plane text-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800 text-sm">Surat Keluar</h5>
+                            <p class="text-[11px] text-slate-500">Buat & Kelola Surat Keluar</p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('buat-surat')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex items-center gap-4 group">
+                        <div class="bg-amber-500 text-white p-3.5 rounded-xl group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-file-circle-plus text-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800 text-sm">Buat Surat</h5>
+                            <p class="text-[11px] text-slate-500">Generate Surat Otomatis</p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('arsip')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer flex items-center gap-4 group">
+                        <div class="bg-cyan-600 text-white p-3.5 rounded-xl group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-folder-closed text-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800 text-sm">Arsip Digital</h5>
+                            <p class="text-[11px] text-slate-500">Kelola Arsip Sekolah</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-blue-600 text-white p-5 rounded-2xl shadow-md flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="flex items-center gap-2 text-xs font-semibold opacity-90">
+                            <i class="fa-solid fa-inbox"></i>
+                            <span>Surat Masuk</span>
+                        </div>
+                        <div class="text-4xl font-extrabold" id="stat-surat-masuk">1</div>
+                    </div>
+
+                    <div class="bg-emerald-600 text-white p-5 rounded-2xl shadow-md flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="flex items-center gap-2 text-xs font-semibold opacity-90">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Surat Keluar</span>
+                        </div>
+                        <div class="text-4xl font-extrabold" id="stat-surat-keluar">2</div>
+                    </div>
+
+                    <div class="bg-amber-500 text-white p-5 rounded-2xl shadow-md flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="flex items-center gap-2 text-xs font-semibold opacity-90">
+                            <i class="fa-solid fa-folder"></i>
+                            <span>Arsip Digital</span>
+                        </div>
+                        <div class="text-4xl font-extrabold" id="stat-arsip">2</div>
+                    </div>
+
+                    <div class="bg-cyan-500 text-white p-5 rounded-2xl shadow-md flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="flex items-center gap-2 text-xs font-semibold opacity-90">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Data Pegawai</span>
+                        </div>
+                        <div class="text-4xl font-extrabold" id="stat-pegawai">3</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PROFIL SEKOLAH VIEW -->
+            <div id="page-profil" class="page-content hidden max-w-5xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+                        <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow">
+                            <i class="fa-solid fa-school-flag text-lg"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Edit Profil & Kop Surat Sekolah</h3>
+                    </div>
+
+                    <form id="form-profil" onsubmit="saveProfilForm(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Nama Yayasan / Instansi</label>
+                            <input type="text" id="prof_yayasan" value="YAYASAN INTISYARUL ULUM" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold uppercase">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Nama Sekolah</label>
+                            <input type="text" id="prof_sekolah" value="SMP ISLAM AS SHOFI" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-bold text-emerald-700 uppercase">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Sub Keterangan / Kecamatan & Kab.</label>
+                                <input type="text" id="prof_sub" value="MONTONG ARE KECAMATAN KEDIRI KAB. LOMBOK BARAT" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">NPSN</label>
+                                <input type="text" id="prof_npsn" value="69982341" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Kode Pos</label>
+                            <input type="text" id="prof_kodepos" value="83362" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium md:w-1/3">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Alamat Lengkap</label>
+                            <input type="text" id="prof_alamat" value="Jln. TGH. Mustafa Al-Kholidy Montong Are Kediri Lombok Barat NTB, 83362" required class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">URL Logo Kiri (Pemda/Yayasan)</label>
+                                <input type="url" id="prof_logo_kiri" value="https://cdn.phototourl.com/free/2026-07-25-07652bbf-d325-4bf9-b.png" required class="w-full px-3.5 py-2.5 text-xs font-mono border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                           
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Simpan Perubahan Profil</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3. BUAT SURAT KELUAR VIEW -->
+            <div id="page-buat-surat" class="page-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Form Column -->
+                    <div class="lg:col-span-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">Form Surat</h3>
+                            <label class="block text-xs font-medium text-slate-600 mt-2 mb-1">Jenis Surat</label>
+                            <select id="surat_jenis" onchange="onSuratJenisChange()" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-medium">
+                                <option value="Surat Keterangan Aktif Siswa">Surat Keterangan Aktif Siswa</option>
+                                <option value="Surat Keterangan Aktivasi PIP">Surat Keterangan Aktivasi PIP</option>
+                                <option value="Surat Keterangan Pindah Sekolah">Surat Keterangan Pindah Sekolah</option>
+                                <option value="Surat Keterangan Penerimaan Siswa">Surat Keterangan Penerimaan Siswa</option>
+                            </select>
+                        </div>
+
+                        <p id="section-header-title" class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">DATA SURAT KETERANGAN AKTIF SISWA</p>
+
+                        <!-- Dynamic Form Fields Container -->
+                        <div id="dynamic-form-fields" class="space-y-3 text-xs">
+                            <!-- Populated dynamically via JS based on Surat Jenis -->
+                        </div>
+
+                        <button onclick="simpanKeArsip()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow flex items-center justify-center gap-2 mt-4 transition">
+                            <i class="fa-solid fa-folder-plus"></i>
+                            <span>Simpan Ke Arsip</span>
+                        </button>
+                    </div>
+
+                    <!-- Letter Live Preview Area -->
+                    <div class="lg:col-span-7 space-y-3">
+                        <!-- Toolbar Formatting Options -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-100 no-print">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-sliders text-emerald-600"></i>
+                                    <span>Format Surat:</span>
+                                </span>
+                                <!-- Font Selection -->
+                                <select id="letter-font" onchange="applyLetterFormatting()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-emerald-500">
+                                    <option value="'Times New Roman', Times, serif" selected>Times New Roman (Standar)</option>
+                                    <option value="Arial, Helvetica, sans-serif">Arial</option>
+                                </select>
+                                <!-- Font Size Selection -->
+                                <select id="letter-size" onchange="applyLetterFormatting()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-emerald-500">
+                                    <option value="11pt">11 pt</option>
+                                    <option value="12pt" selected>12 pt (Standar)</option>
+                                    <option value="13pt">13 pt</option>
+                                    <option value="14pt">14 pt</option>
+                                </select>
+                                <!-- Line Spacing Selection -->
+                                <select id="letter-spacing" onchange="applyLetterFormatting()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-emerald-500">
+                                    <option value="1.0">Spasi 1.0</option>
+                                    <option value="1.15" selected>Spasi 1.15 (Standar)</option>
+                                    <option value="1.5">Spasi 1.5</option>
+                                </select>
+                            </div>
+
+                            <button onclick="window.print()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow transition">
+                                <i class="fa-solid fa-print"></i>
+                                <span>Cetak Surat</span>
+                            </button>
+                        </div>
+
+                        <!-- F4 Paper Printable Area (Times New Roman Font throughout letter body & signature) -->
+                        <div class="flex justify-center overflow-x-auto p-2">
+                            <div id="printable-letter" class="f4-paper text-black select-text">
+                                <!-- Dynamic Kop Surat Header -->
+                                <div class="flex items-center justify-between border-b-4 border-double border-black pb-3 mb-6">
+                                    <img id="prev-logo-kiri" src="https://cdn.phototourl.com/free/2026-07-25-07652bbf-d325-4bf9-b.png" class="h-20 w-20 object-contain " alt="Logo Kiri">
+                                    <div class="text-center flex-1 px-9">
+                                        <h4 id="prev-yayasan" class="text-[15px]" class="font-bold text-sm tracking-wide">Yayasan As shofi Raehan Hariri</h4>
+                                        <h1 id="prev-sekolah" class="text-2xl font-bold" class="font-extrabold text-base tracking-wider uppercase">SMP ISLAM AS SHOFI</h1>
+                                        <p id="prev-sub" class="text-[13px] font-semibold">MONTONG ARE KECAMATAN KEDIRI KAB. LOMBOK BARAT</p>
+                                        <p id="prev-alamat" class="text-[12px] italic">Jln. TGH. Mustafa Al-Kholidy Montong Are Kediri Lombok Barat NTB, 83362</p>
+                                    </div>
+                                   <img id="prev-logo-kanan" src="https://cdn.phototourl.com/free/2026-07-25-067ff21f-0b15-4714-b51.png" class="h-20 w-20 object-contain hidden" alt="Logo Kanan">
+                                </div>
+
+                                <!-- Dynamic Letter Title & Body (Times New Roman) -->
+                                <div id="letter-content-container" class="letter-content font-serif">
+                                    <!-- Dynamic Rendered Content -->
+                                </div>
+
+                                <!-- Signature Block (Times New Roman) -->
+                                <div class="mt-12 flex justify-end letter-signature font-serif">
+                                    <div class="text-center w-64">
+                                        <p><span id="prev-tempat-surat">Montong Are</span>, <span id="prev-tgl-surat">24 Juli 2026</span></p>
+                                        <p class="font-bold mt-1" id="prev-ttd-jabatan">Kepala Sekolah,</p>
+                                        <div class="h-20"></div>
+                                        <p class="font-bold underline" id="prev-ttd-nama">BAHRAENI, S.Pd.I</p>
+                                        <p id="prev-ttd-nip" class="text-sm font-medium">NIP. 197801052002121001</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 4. SURAT MASUK VIEW -->
+            <div id="page-surat-masuk" class="page-content hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Data Surat Masuk</h3>
+                        <p class="text-xs text-slate-500">Buku agenda, unggah, dan lihat/cetak dokumen PDF surat masuk sekolah</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModalSuratMasuk()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>+ Tambah Surat Masuk</span>
+                        </button>
+                        <button onclick="exportSuratMasukCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Download File</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider">
+                                    <th class="py-3.5 px-4 text-center w-12">NO</th>
+                                    <th class="py-3.5 px-4">NO BERKAS</th>
+                                    <th class="py-3.5 px-4">TGL DITERIMA</th>
+                                    <th class="py-3.5 px-4">NOMOR SURAT</th>
+                                    <th class="py-3.5 px-4">PENGIRIM</th>
+                                    <th class="py-3.5 px-4">PERIHAL</th>
+                                    <th class="py-3.5 px-4 text-center">FILE PDF</th>
+                                    <th class="py-3.5 px-4 text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-surat-masuk-body" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ARSIP DIGITAL VIEW -->
+            <div id="page-arsip" class="page-content hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Arsip Digital Naskah</h3>
+                        <p class="text-xs text-slate-500">Daftar berkas surat keluar dan naskah resmi yang tersimpan</p>
+                    </div>
+
+                    <button onclick="openModalArsip()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>+ Tambah Arsip Baru</span>
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider">
+                                    <th class="py-3.5 px-4 text-center w-12">NO</th>
+                                    <th class="py-3.5 px-4">NOMOR SURAT</th>
+                                    <th class="py-3.5 px-4">JENIS SURAT</th>
+                                    <th class="py-3.5 px-4">PENERIMA / PEMOHON</th>
+                                    <th class="py-3.5 px-4">TANGGAL</th>
+                                    <th class="py-3.5 px-4 text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-arsip-body" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. DATA PEGAWAI VIEW -->
+            <div id="page-pegawai" class="page-content hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Master Data Pegawai</h3>
+                        <p class="text-xs text-slate-500">Daftar guru, staf, dan pejabat penandatangan surat</p>
+                    </div>
+
+                    <button onclick="openModalPegawai()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>+ Tambah Pegawai</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider">
+                                    <th class="py-3.5 px-4 text-center w-12">NO</th>
+                                    <th class="py-3.5 px-4">NAMA LENGKAP</th>
+                                    <th class="py-3.5 px-4">NIP / NUPTK</th>
+                                    <th class="py-3.5 px-4">NIK</th>
+                                    <th class="py-3.5 px-4">JABATAN</th>
+                                    <th class="py-3.5 px-4 text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-pegawai-body" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- CUSTOM CONFIRMATION MODAL -->
+    <div id="modal-confirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
+            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h4 id="confirm-title" class="font-bold text-slate-800 text-base">Konfirmasi Hapus</h4>
+            <p id="confirm-message" class="text-xs text-slate-600">Apakah Anda yakin ingin menghapus data ini?</p>
+            <div class="flex justify-center gap-3 pt-2">
+                <button id="confirm-btn-cancel" class="px-4 py-2 border border-slate-300 text-slate-700 text-xs rounded-xl font-semibold hover:bg-slate-50 transition">Batal</button>
+                <button id="confirm-btn-ok" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs rounded-xl font-semibold transition">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PREVIEW & PRINT PDF SURAT MASUK (NEW FEATURE) -->
+    <div id="modal-view-pdf" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 md:p-6">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="bg-rose-600 p-2 rounded-xl text-white shadow">
+                        <i class="fa-solid fa-file-pdf text-xl"></i>
+                    </div>
+                    <div class="truncate">
+                        <h4 id="pdf-modal-title" class="font-bold text-sm md:text-base truncate">Pratinjau Berkas PDF Surat Masuk</h4>
+                        <p id="pdf-modal-subtitle" class="text-[11px] text-slate-300 truncate">Nomor Surat: -</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button onclick="printPdfDocument()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-2 transition shadow">
+                        <i class="fa-solid fa-print"></i>
+                        <span class="hidden sm:inline">Cetak Dokumen</span>
+                    </button>
+                    <a id="pdf-download-btn" href="#" download="Surat_Masuk.pdf" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-2 transition shadow">
+                        <i class="fa-solid fa-download"></i>
+                        <span class="hidden sm:inline">Unduh PDF</span>
+                    </a>
+                    <button onclick="closeModalViewPdf()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-xl transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF Viewer Body -->
+            <div class="flex-1 bg-slate-200 relative overflow-hidden flex items-center justify-center">
+                <!-- Frame Viewer untuk File Data PDF -->
+                <iframe id="pdf-frame-viewer" class="w-full h-full border-0 hidden" title="Dokumen PDF Surat Masuk"></iframe>
+
+                <!-- Fallback jika belum ada file atau format non-data URL -->
+                <div id="pdf-fallback-container" class="text-center p-8 max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 hidden">
+                    <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <h5 id="pdf-fallback-title" class="font-bold text-slate-800 text-base mb-1">Pratinjau Lembar Surat Masuk</h5>
+                    <p id="pdf-fallback-desc" class="text-xs text-slate-500 mb-4">Berkas fisik belum diunggah. Tampilan berikut adalah lembar ringingan resmi dokumen surat masuk.</p>
+
+                    <!-- Lembar Pratinjau Teks jika file PDF tidak ada -->
+                    <div id="pdf-print-area" class="bg-white border text-left p-6 rounded-xl space-y-3 font-serif text-xs text-slate-800 shadow-inner max-h-60 overflow-y-auto mb-4">
+                        <div class="border-b pb-2 text-center">
+                            <h6 class="font-bold uppercase text-sm" id="fallback-sekolah-title">SMP ISLAM AS SHOFI</h6>
+                            <p class="text-[10px] text-slate-600">AGENDA SURAT MASUK RESMI</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p><strong>Nomor Berkas:</strong> <span id="fb-no-berkas">-</span></p>
+                            <p><strong>Tanggal Diterima:</strong> <span id="fb-tgl">-</span></p>
+                            <p><strong>Nomor Surat:</strong> <span id="fb-no-surat">-</span></p>
+                            <p><strong>Pengirim:</strong> <span id="fb-pengirim">-</span></p>
+                            <p><strong>Perihal:</strong> <span id="fb-perihal">-</span></p>
+                        </div>
+                    </div>
+
+                    <button onclick="printFallbackDocument()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak Lembar Agenda Ini</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GOOGLE APPS SCRIPT INTEGRATION & SETUP -->
+    <div id="modal-gas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-emerald-100 text-emerald-700 p-2 rounded-xl">
+                        <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Pengaturan Integrasi Google Apps Script</h4>
+                        <p class="text-xs text-slate-500">Hubungkan SIMAS ke Google Sheets secara otomatis</p>
+                    </div>
+                </div>
+                <button onclick="closeGasModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">URL Web App Google Apps Script</label>
+                    <input type="url" id="gas-url-input" placeholder="https://script.google.com/macros/s/AKfycbx.../exec" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-emerald-500">
+                    <p class="text-[11px] text-slate-500 mt-1">Masukkan Web App URL yang disebarkan dari Google Sheets Apps Script.</p>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900 space-y-2">
+                    <h5 class="font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                        <span>Cara Membuat Backend Google Apps Script (3 Langkah):</span>
+                    </h5>
+                    <ol class="list-decimal pl-4 space-y-1 text-[11px]">
+                        <li>Buka Google Spreadsheet baru di Google Drive Anda.</li>
+                        <li>Klik menu <strong>Extensi &gt; Apps Script</strong>, lalu hapus semua kode dan tempel kode GAS.</li>
+                        <li>Klik <strong>Terapkan (Deploy) &gt; Terapkan sebagai Web App</strong>, pilih akses <em>"Siapa Saja (Anyone)"</em>, lalu salin URL Web App ke kolom di atas.</li>
+                    </ol>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-slate-700">Kode Google Apps Script (Code.gs):</span>
+                        <button onclick="copyGasCode()" class="text-xs text-blue-600 hover:underline flex items-center gap-1 font-semibold">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Salin Kode</span>
+                        </button>
+                    </div>
+                    <pre id="gas-code-text" class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono text-[10px] overflow-x-auto max-h-48 select-all leading-relaxed">
+function doGet(e) {
+  var action = e.parameter.action;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  if (action === 'getAllData') {
+    var profileSheet = getOrCreateSheet(ss, 'Profil');
+    var pegawaiSheet = getOrCreateSheet(ss, 'Pegawai');
+    var suratMasukSheet = getOrCreateSheet(ss, 'SuratMasuk');
+    var arsipSheet = getOrCreateSheet(ss, 'ArsipDigital');
+    
+    return createJsonResponse({
+      profil: getSheetData(profileSheet),
+      pegawai: getSheetData(pegawaiSheet),
+      suratMasuk: getSheetData(suratMasukSheet),
+      arsip: getSheetData(arsipSheet)
+    });
+  }
+  return createJsonResponse({ status: 'ok' });
+}
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var action = data.action;
+    
+    if (action === 'saveProfil') {
+      var sheet = getOrCreateSheet(ss, 'Profil');
+      sheet.clear();
+      sheet.appendRow(['key', 'value']);
+      for (var k in data.payload) {
+        sheet.appendRow([k, data.payload[k]]);
+      }
+    } else if (action === 'savePegawai') {
+      saveArrayData(ss, 'Pegawai', ['id', 'nama', 'nip', 'nik', 'jabatan'], data.payload);
+    } else if (action === 'saveSuratMasuk') {
+      saveArrayData(ss, 'SuratMasuk', ['id', 'noBerkas', 'tglDiterima', 'nomorSurat', 'pengirim', 'perihal', 'fileName', 'fileData'], data.payload);
+    } else if (action === 'saveArsip') {
+      saveArrayData(ss, 'ArsipDigital', ['id', 'nomorSurat', 'jenisSurat', 'penerima', 'tanggal'], data.payload);
+    }
+    
+    return createJsonResponse({ success: true });
+  } catch(err) {
+    return createJsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) sheet = ss.insertSheet(name);
+  return sheet;
+}
+
+function getSheetData(sheet) {
+  var values = sheet.getDataRange().getValues();
+  if (values.length <= 1) return [];
+  var headers = values[0];
+  var results = [];
+  for (var i = 1; i < values.length; i++) {
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = values[i][j];
+    }
+    results.push(obj);
+  }
+  return results;
+}
+
+function saveArrayData(ss, sheetName, headers, items) {
+  var sheet = getOrCreateSheet(ss, sheetName);
+  sheet.clear();
+  sheet.appendRow(headers);
+  items.forEach(function(item) {
+    var row = [];
+    headers.forEach(function(h) { row.push(item[h] || ''); });
+    sheet.appendRow(row);
+  });
+}
+
+function createJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+</pre>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="testGasConnection()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl border border-slate-300">
+                    Uji Koneksi
+                </button>
+                <button onclick="saveGasUrl()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow">
+                    Simpan Pengaturan GAS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TAMBAH / EDIT SURAT MASUK (DENGAN UPLOAD PDF) -->
+    <div id="modal-surat-masuk" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h4 id="modal-sm-title" class="font-bold text-slate-800 text-base border-b pb-2">Tambah Data Surat Masuk</h4>
+            <form onsubmit="saveSuratMasukModal(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="m_sm_id">
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">No Berkas</label>
+                    <input type="text" id="m_sm_berkas" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Tanggal Diterima</label>
+                    <input type="date" id="m_sm_tgl" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                    <input type="text" id="m_sm_nomor" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Pengirim</label>
+                    <input type="text" id="m_sm_pengirim" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Perihal</label>
+                    <input type="text" id="m_sm_perihal" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Upload File PDF Surat</label>
+                    <input type="file" id="m_sm_file_pdf" accept="application/pdf" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-700 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    <p id="m_sm_file_status" class="text-[10px] text-slate-500 mt-1">Pilih berkas dokumen berformat PDF (opsional)</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModalSuratMasuk()" class="px-4 py-2 border text-slate-600 rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TAMBAH / EDIT ARSIP DIGITAL -->
+    <div id="modal-arsip" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h4 id="modal-arsip-title" class="font-bold text-slate-800 text-base border-b pb-2">Edit Data Arsip Digital</h4>
+            <form onsubmit="saveArsipModal(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="m_arsip_id">
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                    <input type="text" id="m_arsip_nomor" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Jenis Surat</label>
+                    <input type="text" id="m_arsip_jenis" required placeholder="Contoh: Surat Keterangan Aktif Siswa" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Penerima / Pemohon</label>
+                    <input type="text" id="m_arsip_penerima" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Tanggal</label>
+                    <input type="date" id="m_arsip_tanggal" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModalArsip()" class="px-4 py-2 border text-slate-600 rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold">Simpan Arsip</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TAMBAH PEGAWAI -->
+    <div id="modal-pegawai" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h4 id="modal-pegawai-title" class="font-bold text-slate-800 text-base border-b pb-2">Tambah Master Data Pegawai</h4>
+            <form onsubmit="savePegawaiModal(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="m_peg_id">
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                    <input type="text" id="m_peg_nama" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">NIP / NUPTK</label>
+                    <input type="text" id="m_peg_nip" placeholder="197801052002121001 / 8439..." required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">NIK (Nomor Induk Kependudukan)</label>
+                    <input type="text" id="m_peg_nik" placeholder="520115..." required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Jabatan</label>
+                    <input type="text" id="m_peg_jabatan" required placeholder="Kepala Madrasah / Guru Kelas / Staf" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModalPegawai()" class="px-4 py-2 border text-slate-600 rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold">Simpan Pegawai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TENTANG SIMAS -->
+    <div id="modal-about" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center space-y-3">
+            <div class="w-16 h-16 bg-simas-green text-white rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-md">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h3 class="font-extrabold text-xl text-slate-800">SIMAS DESKTOP V.1.0</h3>
+            <p class="text-xs text-slate-600">Sistem Manajemen Administrasi Sekolah terintegrasi Google Sheets Apps Script API.</p>
+            <p class="text-[11px] text-slate-400 font-mono">Build ID: 2026.08.11-STABLE</p>
+            <button onclick="closeAboutModal()" class="w-full bg-slate-800 text-white font-semibold py-2 rounded-xl text-xs mt-2">Tutup</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const defaultState = {
+            gasUrl: "",
+            profil: {
+                yayasan: "YAYASAN AS SHOFI RAEHAN HARIRI",
+                sekolah: "SMP ISLAM AS SHOFI",
+                sub: "MONTONG ARE KECAMATAN KEDIRI KAB. LOMBOK BARAT",
+                npsn: "69982341",
+                kodepos: "83362",
+                alamat: "Jln. TGH. Mustafa Al-Kholidy Montong Are Kediri Lombok Barat NTB, 83362",
+                logoKiri: "https://cdn.phototourl.com/free/2026-07-25-07652bbf-d325-4bf9-b.png",
+              
+            },
+            pegawai: [
+                { id: 1, nama: "BAHRAENI, S.Pd.I", nip: "197801052002121001", nik: "5201155001780001", jabatan: "Kepala SMP ISLAM AS SHOFI" },
+                { id: 2, nama: "WAHYU KURNIAWATI, S.PD", nip: "199103242017082001", nik: "5201156403910002", jabatan: "Guru Kelas" },
+                { id: 3, nama: "IRHAM, S.Kom", nip: "199405152025211086", nik: "5201151505940003", jabatan: "Staf Tata Usaha" }
+            ],
+            suratMasuk: [
+                { id: 1, noBerkas: "1", tglDiterima: "2026-07-22", nomorSurat: "321/MI.UI/VII/2026", pengirim: "Orang Tua / Wali Siswa", perihal: "Permohonan Pindah / Masuk Sekolah", fileName: "Surat_Permohonan.pdf", fileData: "" }
+            ],
+            arsip: [
+                { id: 1, nomorSurat: "400.45677957587", jenisSurat: "Surat Keterangan Aktif Siswa", penerima: "AZIZUL KADZA UTAMA", tanggal: "2026-06-22" },
+                { id: 2, nomorSurat: "400.45677957587", jenisSurat: "Surat Keterangan Pindah Sekolah", penerima: "Naufal Febrian", tanggal: "2026-07-24" }
+            ]
+        };
+
+        let appData = JSON.parse(localStorage.getItem('simas_app_data')) || defaultState;
+        let currentViewingPdfData = null;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColors = {
+                success: 'bg-emerald-600 text-white',
+                info: 'bg-blue-600 text-white',
+                warning: 'bg-amber-500 text-white',
+                error: 'bg-rose-600 text-white'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                info: 'fa-circle-info',
+                warning: 'fa-triangle-exclamation',
+                error: 'fa-circle-xmark'
+            };
+            toast.className = `${bgColors[type] || bgColors.info} px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-sm"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        let pendingConfirmAction = null;
+        function showConfirm(title, message, onConfirm) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            pendingConfirmAction = onConfirm;
+            document.getElementById('modal-confirm').classList.remove('hidden');
+        }
+
+        document.getElementById('confirm-btn-cancel').onclick = function() {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            pendingConfirmAction = null;
+        };
+
+        document.getElementById('confirm-btn-ok').onclick = function() {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            if (pendingConfirmAction) {
+                pendingConfirmAction();
+                pendingConfirmAction = null;
+            }
+        };
+
+        function saveLocal() {
+            localStorage.setItem('simas_app_data', JSON.stringify(appData));
+            updateDashboardCounters();
+            syncToGasBackend();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-simas-active', 'text-white');
+                el.classList.add('hover:bg-green-700/60', 'text-green-50');
+            });
+
+            const targetPage = document.getElementById(`page-${tabId}`);
+            if (targetPage) targetPage.classList.remove('hidden');
+
+            const targetNav = document.getElementById(`nav-${tabId}`);
+            if (targetNav) {
+                targetNav.classList.add('bg-simas-active', 'text-white');
+                targetNav.classList.remove('hover:bg-green-700/60', 'text-green-50');
+            }
+
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'profil': 'Profil Sekolah',
+                'buat-surat': 'Pembuatan Surat Otomatis',
+                'surat-masuk': 'Buku Agenda Surat Masuk',
+                'arsip': 'Arsip Digital Naskah',
+                'pegawai': 'Master Data Pegawai'
+            };
+            document.getElementById('top-bar-title').innerText = titles[tabId] || 'SIMAS';
+
+            if (tabId === 'buat-surat') {
+                onSuratJenisChange();
+            } else if (tabId === 'surat-masuk') {
+                renderTableSuratMasuk();
+            } else if (tabId === 'pegawai') {
+                renderTablePegawai();
+            } else if (tabId === 'arsip') {
+                renderTableArsip();
+            } else if (tabId === 'profil') {
+                renderProfilForm();
+            }
+        }
+
+        function startLiveClock() {
+            function updateClock() {
+                const now = new Date();
+                const hrs = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('live-clock').innerText = `${hrs}.${mins}.${secs}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        function updateDashboardCounters() {
+            document.getElementById('stat-surat-masuk').innerText = appData.suratMasuk.length;
+            document.getElementById('stat-surat-keluar').innerText = appData.arsip.length;
+            document.getElementById('stat-arsip').innerText = appData.arsip.length;
+            document.getElementById('stat-pegawai').innerText = appData.pegawai.length;
+
+            document.getElementById('dash-nama-sekolah').innerText = appData.profil.sekolah;
+            document.getElementById('dash-npsn').innerText = appData.profil.npsn;
+            if (appData.pegawai.length > 0) {
+                document.getElementById('dash-kepala').innerText = appData.pegawai[0].nama;
+            }
+            if (appData.profil.logoKiri) document.getElementById('dash-logo-kiri').src = appData.profil.logoKiri;
+     
+        }
+
+        function renderProfilForm() {
+            document.getElementById('prof_yayasan').value = appData.profil.yayasan || '';
+            document.getElementById('prof_sekolah').value = appData.profil.sekolah || '';
+            document.getElementById('prof_sub').value = appData.profil.sub || '';
+            document.getElementById('prof_npsn').value = appData.profil.npsn || '';
+            document.getElementById('prof_kodepos').value = appData.profil.kodepos || '';
+            document.getElementById('prof_alamat').value = appData.profil.alamat || '';
+            document.getElementById('prof_logo_kiri').value = appData.profil.logoKiri || '';
+          
+        }
+
+        function saveProfilForm(e) {
+            e.preventDefault();
+            appData.profil = {
+                yayasan: document.getElementById('prof_yayasan').value,
+                sekolah: document.getElementById('prof_sekolah').value,
+                sub: document.getElementById('prof_sub').value,
+                npsn: document.getElementById('prof_npsn').value,
+                kodepos: document.getElementById('prof_kodepos').value,
+                alamat: document.getElementById('prof_alamat').value,
+                logoKiri: document.getElementById('prof_logo_kiri').value,
+              
+            };
+            saveLocal();
+            showToast('Profil Sekolah berhasil diperbarui!', 'success');
+        }
+
+        function applyLetterFormatting() {
+            const font = document.getElementById('letter-font').value;
+            const size = document.getElementById('letter-size').value;
+            const spacing = document.getElementById('letter-spacing').value;
+            const paper = document.getElementById('printable-letter');
+
+            if (paper) {
+                paper.style.fontFamily = font;
+                paper.style.fontSize = size;
+                paper.style.lineHeight = spacing;
+            }
+        }
+
+        function onSuratJenisChange() {
+            const jenis = document.getElementById('surat_jenis').value;
+            const container = document.getElementById('dynamic-form-fields');
+            const headerTitle = document.getElementById('section-header-title');
+
+            headerTitle.innerText = `DATA ${jenis.toUpperCase()}`;
+
+            let pejabatOptions = appData.pegawai.map(p => `<option value="${p.id}">${p.nama} - ${p.jabatan}</option>`).join('');
+
+            if (jenis === 'Surat Keterangan Aktif Siswa') {
+                container.innerHTML = `
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                        <input type="text" id="surat_nomor" value="400.45677957587" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pejabat Penandatangan</label>
+                        <select id="surat_pejabat" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            ${pejabatOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Siswa</label>
+                        <input type="text" id="surat_nama_siswa" value="AZIZUL KADZA UTAMA" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Jenis Kelamin</label>
+                            <select id="surat_jk" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Laki-Laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kelas</label>
+                            <input type="text" id="surat_kelas" value="VI (Enam)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NISN</label>
+                            <input type="text" id="surat_nisn" value="3146743419" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NIK</label>
+                            <input type="text" id="surat_nik" value="5201151509140004" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Tempat, Tanggal Lahir</label>
+                        <input type="text" id="surat_ttl" value="PEDEK ANYAR, 15-09-2015" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Orang Tua / Wali Siswa</label>
+                        <input type="text" id="surat_ortu" value="MUHAMMADUN" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Semester</label>
+                            <input type="text" id="surat_semester" value="I (Ganjil)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tahun Pelajaran</label>
+                            <input type="text" id="surat_tp" value="2026/2027" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tanggal Surat</label>
+                            <input type="text" id="surat_tgl" value="22 Juni 2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tempat Surat</label>
+                            <input type="text" id="surat_tempat" value="Montong Are" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                `;
+            } else if (jenis === 'Surat Keterangan Aktivasi PIP') {
+                container.innerHTML = `
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                        <input type="text" id="surat_nomor" value="124/MI.UI/PIP/VIII/2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pejabat Penandatangan</label>
+                        <select id="surat_pejabat" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            ${pejabatOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Siswa / Penerima PIP</label>
+                        <input type="text" id="surat_nama_siswa" value="AZIZUL KADZA UTAMA" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NISN</label>
+                            <input type="text" id="surat_nisn" value="3146743419" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Jenis Kelamin</label>
+                            <select id="surat_jk" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Laki-Laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Tempat, Tanggal Lahir</label>
+                        <input type="text" id="surat_ttl" value="PEDEK ANYAR, 15-09-2015" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kelas</label>
+                            <input type="text" id="surat_kelas" value="VI (Enam)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Nama Ibu Kandung</label>
+                            <input type="text" id="surat_ibu_kandung" value="INDAH SURI" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+                        <p class="text-[11px] font-bold text-amber-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-credit-card text-amber-600"></i>
+                            <span>Data Rekening Bantuan PIP</span>
+                        </p>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-700 mb-1">Nomor Rekening PIP</label>
+                            <input type="text" id="surat_no_rekening" value="0012-01-089765-53-4" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold bg-white text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-700 mb-1">Bank Penyalur</label>
+                            <input type="text" id="surat_bank" value="Bank Rakyat Indonesia (BRI)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white font-medium">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tanggal Surat</label>
+                            <input type="text" id="surat_tgl" value="05 Agustus 2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tempat Surat</label>
+                            <input type="text" id="surat_tempat" value="Montong Are" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                `;
+            } else if (jenis === 'Surat Keterangan Pindah Sekolah') {
+                container.innerHTML = `
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                        <input type="text" id="surat_nomor" value="400.45677957587" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pejabat Penandatangan</label>
+                        <select id="surat_pejabat" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            ${pejabatOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Siswa</label>
+                        <input type="text" id="surat_nama_siswa" value="Naufal Febrian" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Tempat, Tanggal Lahir</label>
+                        <input type="text" id="surat_ttl" value="Mataram, 14 Februari 2015" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Jenis Kelamin</label>
+                            <select id="surat_jk" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Laki-Laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NISN / NPSN Siswa</label>
+                            <input type="text" id="surat_nisn_npsn" value="282713713" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Alamat Siswa</label>
+                        <input type="text" id="surat_alamat_siswa" value="Samah Ngiring" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Orang Tua</label>
+                        <input type="text" id="surat_ortu" value="Muhammadun" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pindah Ke Sekolah Tujuan</label>
+                        <input type="text" id="surat_sekolah_tujuan" value="SDN 97 Mataram" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kelas Saat Pindah</label>
+                            <input type="text" id="surat_kelas" value="V (Lima)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Semester</label>
+                            <input type="text" id="surat_semester" value="Ganjil I" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tahun Pelajaran</label>
+                            <input type="text" id="surat_tp" value="2026/2027" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tanggal Surat</label>
+                            <input type="text" id="surat_tgl" value="24 Juli 2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <input type="hidden" id="surat_tempat" value="Montong Are">
+                `;
+            } else {
+                container.innerHTML = `
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nomor Surat</label>
+                        <input type="text" id="surat_nomor" value="321/MI.UI/VII/2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Pejabat Penandatangan</label>
+                        <select id="surat_pejabat" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            ${pejabatOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Siswa</label>
+                        <input type="text" id="surat_nama_siswa" value="Reza Ramdani" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Jenis Kelamin</label>
+                            <select id="surat_jk" onchange="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Laki-Laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NPSN / NISN</label>
+                            <input type="text" id="surat_npsn_siswa" value="83489348" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Tempat/Tgl.Lahir</label>
+                        <input type="text" id="surat_ttl" value="Kediri, 09/07/2015" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kelas</label>
+                            <input type="text" id="surat_kelas" value="V (Lima)" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Semester</label>
+                            <input type="text" id="surat_semester" value="I Ganjil" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Alamat Siswa</label>
+                        <input type="text" id="surat_alamat_siswa" value="Samah Ngiring" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nama Orang Tua</label>
+                        <input type="text" id="surat_ortu" value="Inti hana" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Lokasi/Sekolah Penerima</label>
+                        <input type="text" id="surat_penerima_asal" value="SMP ISLAM AS SHOFI Montong Are Kediri Lombok Barat" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tahun Pelajaran</label>
+                            <input type="text" id="surat_tp" value="2026/2027" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Tempat Surat</label>
+                            <input type="text" id="surat_tempat" value="Montong Are" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Tanggal Surat</label>
+                        <input type="text" id="surat_tgl" value="24 Juli 2026" oninput="updateLetterPreview()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                `;
+            }
+
+            updateLetterPreview();
+        }
+
+        function updateLetterPreview() {
+            document.getElementById('prev-yayasan').innerText = appData.profil.yayasan || 'YAYASAN AS SHOFI RAEHAN HARIRI';
+            document.getElementById('prev-sekolah').innerText = appData.profil.sekolah || 'SMP ISLAM AS SHOFI';
+            document.getElementById('prev-sub').innerText = appData.profil.sub || '';
+            document.getElementById('prev-alamat').innerText = appData.profil.alamat || '';
+            if (appData.profil.logoKiri) document.getElementById('prev-logo-kiri').src = appData.profil.logoKiri;
+        
+
+            const jenis = document.getElementById('surat_jenis').value;
+            const container = document.getElementById('letter-content-container');
+
+            const noSurat = document.getElementById('surat_nomor') ? document.getElementById('surat_nomor').value : '';
+            const selectedPejabatId = document.getElementById('surat_pejabat') ? document.getElementById('surat_pejabat').value : null;
+            const pejabat = appData.pegawai.find(p => p.id == selectedPejabatId) || appData.pegawai[0] || { nama: 'BAHRAENI, S.Pd.I', nip: '197801052002121001', jabatan: 'Kepala Madrasah' };
+
+            document.getElementById('prev-ttd-nama').innerText = pejabat.nama;
+            document.getElementById('prev-ttd-nip').innerText = 'NIP. ' + pejabat.nip;
+            document.getElementById('prev-tempat-surat').innerText = document.getElementById('surat_tempat') ? document.getElementById('surat_tempat').value : 'Montong Are';
+            document.getElementById('prev-tgl-surat').innerText = document.getElementById('surat_tgl') ? document.getElementById('surat_tgl').value : '';
+
+            const namaSiswa = document.getElementById('surat_nama_siswa') ? document.getElementById('surat_nama_siswa').value.toUpperCase() : '';
+            const jk = document.getElementById('surat_jk') ? document.getElementById('surat_jk').value : '';
+            const ttl = document.getElementById('surat_ttl') ? document.getElementById('surat_ttl').value : '';
+            const kelas = document.getElementById('surat_kelas') ? document.getElementById('surat_kelas').value : '';
+
+            applyLetterFormatting();
+
+            if (jenis === 'Surat Keterangan Aktif Siswa') {
+                const nisn = document.getElementById('surat_nisn') ? document.getElementById('surat_nisn').value : '';
+                const nik = document.getElementById('surat_nik') ? document.getElementById('surat_nik').value : '';
+                const namaOrtu = document.getElementById('surat_ortu') ? document.getElementById('surat_ortu').value.toUpperCase() : '';
+                const semester = document.getElementById('surat_semester') ? document.getElementById('surat_semester').value : '';
+                const tp = document.getElementById('surat_tp') ? document.getElementById('surat_tp').value : '';
+
+                container.innerHTML = `
+                    <div class="text-center my-6">
+                        <h3 class="font-bold text-base uppercase underline tracking-wider text-center">SURAT KETERANGAN SEKOLAH</h3>
+                        <p class="text-center text-sm font-medium mt-1">Nomor : ${noSurat}</p>
+                    </div>
+
+                    <div class="space-y-4 text-justify">
+                        <p>Yang bertanda tangan di bawah ini :</p>
+                        
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama</span><span>: <strong >${pejabat.nama}</strong></span></div>
+                            <div class="flex"><span class="w-40">NIP</span><span>: ${pejabat.nip}</span></div>
+                            <div class="flex"><span class="w-40">Jabatan</span><span>: ${pejabat.jabatan}</span></div>
+                        </div>
+
+                        <p>Menerangkan bahwa :</p>
+
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama</span><span>: <strong class="uppercase">${namaSiswa}</strong></span></div>
+                            <div class="flex"><span class="w-40">Jenis Kelamin</span><span>: ${jk}</span></div>
+                            <div class="flex"><span class="w-40">NISN</span><span>: ${nisn}</span></div>
+                            <div class="flex"><span class="w-40">NIK</span><span>: ${nik}</span></div>
+                            <div class="flex"><span class="w-40">Tempat, Tgl Lahir</span><span>: ${ttl}</span></div>
+                            <div class="flex"><span class="w-40">Nama Orang Tua</span><span>: <strong class="uppercase">${namaOrtu}</strong></span></div>
+                            <div class="flex"><span class="w-40">Kelas</span><span>: ${kelas}</span></div>
+                        </div>
+
+                        <p class="leading-relaxed text-justify">
+                            Bahwa siswa tersebut memang benar aktif di <strong>${appData.profil.sekolah}</strong> pada kelas ${kelas} Semester ${semester} Tahun Pelajaran ${tp}.
+                        </p>
+
+                        <p class="text-justify">Demikian Surat Keterangan ini dibuat untuk dapat dipergunakan sebagaimana mestinya, terima kasih.</p>
+                    </div>
+                `;
+            } else if (jenis === 'Surat Keterangan Aktivasi PIP') {
+                const nisn = document.getElementById('surat_nisn') ? document.getElementById('surat_nisn').value : '';
+                const ibuKandung = document.getElementById('surat_ibu_kandung') ? document.getElementById('surat_ibu_kandung').value.toUpperCase() : '';
+                const noRekening = document.getElementById('surat_no_rekening') ? document.getElementById('surat_no_rekening').value : '';
+                const bank = document.getElementById('surat_bank') ? document.getElementById('surat_bank').value : 'Bank Penyalur';
+
+                container.innerHTML = `
+                    <div class="text-center my-6">
+                        <h3 class="font-bold text-base uppercase underline tracking-wider text-center">SURAT KETERANGAN AKTIVASI REKENING PIP</h3>
+                        <p class="text-center text-sm font-medium mt-1">Nomor : ${noSurat}</p>
+                    </div>
+
+                    <div class="space-y-4 text-justify">
+                        <p>Yang bertanda tangan di bawah ini :</p>
+                        
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama</span><span>: <strong >${pejabat.nama}</strong></span></div>
+                            <div class="flex"><span class="w-40">NIP</span><span>: ${pejabat.nip}</span></div>
+                            <div class="flex"><span class="w-40">Jabatan</span><span>: ${pejabat.jabatan}</span></div>
+                        </div>
+
+                        <p>Dengan ini menerangkan dengan sesungguhnya bahwa :</p>
+
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama Siswa</span><span>: <strong class="uppercase">${namaSiswa}</strong></span></div>
+                            <div class="flex"><span class="w-40">NISN</span><span>: ${nisn}</span></div>
+                            <div class="flex"><span class="w-40">Tempat, Tanggal Lahir</span><span>: ${ttl}</span></div>
+                            <div class="flex"><span class="w-40">Jenis Kelamin</span><span>: ${jk}</span></div>
+                            <div class="flex"><span class="w-40">Kelas</span><span>: ${kelas}</span></div>
+                            <div class="flex"><span class="w-40">Nama Ibu Kandung</span><span>: <strong class="uppercase">${ibuKandung}</strong></span></div>
+                            <div class="flex"><span class="w-40">Nomor Rekening PIP</span><span>: <strong class="text-base">${noRekening}</strong></span></div>
+                            <div class="flex"><span class="w-40">Bank Penyalur</span><span>: ${bank}</span></div>
+                        </div>
+
+                        <p class="leading-relaxed text-justify">
+                            Adalah benar peserta didik terdaftar aktif di <strong>${appData.profil.sekolah}</strong> dan penerima bantuan Program Indonesia Pintar (PIP).
+                        </p>
+
+                        <p class="text-justify">Demikian Surat Keterangan ini dibuat agar dapat dipergunakan sebagai persyaratan aktivasi rekening PIP pada ${bank}.</p>
+                    </div>
+                `;
+            } else if (jenis === 'Surat Keterangan Pindah Sekolah') {
+                const nisnNpsn = document.getElementById('surat_nisn_npsn') ? document.getElementById('surat_nisn_npsn').value : '';
+                const alamatSiswa = document.getElementById('surat_alamat_siswa') ? document.getElementById('surat_alamat_siswa').value : '';
+                const ortu = document.getElementById('surat_ortu') ? document.getElementById('surat_ortu').value.toUpperCase() : '';
+                const sekolahTujuan = document.getElementById('surat_sekolah_tujuan') ? document.getElementById('surat_sekolah_tujuan').value : '';
+                const semester = document.getElementById('surat_semester') ? document.getElementById('surat_semester').value : '';
+                const tp = document.getElementById('surat_tp') ? document.getElementById('surat_tp').value : '';
+
+                container.innerHTML = `
+                    <div class="text-center my-6">
+                        <h3 class="font-bold text-base uppercase underline tracking-wider text-center">SURAT KETERANGAN PINDAH SEKOLAH</h3>
+                        <p class="text-center text-sm font-medium mt-1">Nomor : ${noSurat}</p>
+                    </div>
+                    
+
+                    <div class="space-y-4 text-justify">
+                         <p>Yang bertanda tangan di bawah ini :</p>
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama</span><span>: <strong >${pejabat.nama}</strong></span></div>
+                            <div class="flex"><span class="w-40">NIP</span><span>: ${pejabat.nip}</span></div>
+                            <div class="flex"><span class="w-40">Jabatan</span><span>: ${pejabat.jabatan}</span></div>
+                        </div>
+                        <p>Dengan ini menerangkan dengan sesungguhnya bahwa :</p>
+
+                        
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama Siswa</span><span>: <strong class="uppercase">${namaSiswa}</strong></span></div>
+                            <div class="flex"><span class="w-40">Tempat, Tgl Lahir</span><span>: ${ttl}</span></div>
+                            <div class="flex"><span class="w-40">Jenis Kelamin</span><span>: ${jk}</span></div>
+                            <div class="flex"><span class="w-40">NISN / NPSN</span><span>: ${nisnNpsn}</span></div>
+                            <div class="flex"><span class="w-40">Alamat</span><span>: ${alamatSiswa}</span></div>
+                            <div class="flex"><span class="w-40">Nama Orang Tua</span><span>: <strong class="uppercase">${ortu}</strong></span></div>
+                        </div>
+
+                        <p>Telah mengajukan permohonan pindah sekolah dari <strong>${appData.profil.sekolah}</strong> ke <strong>${sekolahTujuan}</strong> pada Kelas ${kelas} Semester ${semester} Tahun Pelajaran ${tp}.</p>
+
+                        <p class="text-justify">Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
+                    </div>
+                `;
+            } else {
+                const npsnSiswa = document.getElementById('surat_npsn_siswa') ? document.getElementById('surat_npsn_siswa').value : '';
+                const alamatSiswa = document.getElementById('surat_alamat_siswa') ? document.getElementById('surat_alamat_siswa').value : '';
+                const ortu = document.getElementById('surat_ortu') ? document.getElementById('surat_ortu').value.toUpperCase() : '';
+                const penerimaAsal = document.getElementById('surat_penerima_asal') ? document.getElementById('surat_penerima_asal').value : '';
+                const semester = document.getElementById('surat_semester') ? document.getElementById('surat_semester').value : '';
+                const tp = document.getElementById('surat_tp') ? document.getElementById('surat_tp').value : '';
+
+                container.innerHTML = `
+                    <div class="text-center my-6">
+                        <h3 class="font-bold text-base uppercase underline tracking-wider text-center">SURAT KETERANGAN PENERIMAAN SISWA</h3>
+                        <p class="text-center text-sm font-medium mt-1">Nomor : ${noSurat}</p>
+                    </div>
+
+                    <div class="space-y-4 text-justify">
+                        <p>Yang bertanda tangan di bawah ini :</p>
+                        
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama</span><span>: <strong >${pejabat.nama}</strong></span></div>
+                            <div class="flex"><span class="w-40">NIP</span><span>: ${pejabat.nip}</span></div>
+                            <div class="flex"><span class="w-40">Jabatan</span><span>: ${pejabat.jabatan}</span></div>
+                        </div> 
+                         <p>Dengan ini menerangkan dengan sesungguhnya bahwa :</p>
+                        <div class="pl-6 space-y-1">
+                            <div class="flex"><span class="w-40">Nama Siswa</span><span>: <strong class="uppercase">${namaSiswa}</strong></span></div>
+                            <div class="flex"><span class="w-40">Tempat, Tgl Lahir</span><span>: ${ttl}</span></div>
+                            <div class="flex"><span class="w-40">Jenis Kelamin</span><span>: ${jk}</span></div>
+                            <div class="flex"><span class="w-40">NISN / NPSN</span><span>: ${npsnSiswa}</span></div>
+                            <div class="flex"><span class="w-40">Nama Orang Tua</span><span>: <strong class="uppercase">${ortu}</strong></span></div>
+                            <div class="flex"><span class="w-40">Alamat</span><span>: ${alamatSiswa}</span></div>
+                        </div>
+
+                        <p>Diterima sebagai siswa di <strong>${penerimaAsal}</strong> pada Kelas ${kelas} Semester ${semester} Tahun Pelajaran ${tp}.</p>
+
+                        <p class="text-justify">Demikian Surat Keterangan Penerimaan ini dibuat untuk dipergunakan seperlunya.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function simpanKeArsip() {
+            const jenis = document.getElementById('surat_jenis').value;
+            const noSurat = document.getElementById('surat_nomor') ? document.getElementById('surat_nomor').value : '400.000';
+            const namaSiswa = document.getElementById('surat_nama_siswa') ? document.getElementById('surat_nama_siswa').value.toUpperCase() : 'SISWA';
+            const tglSurat = document.getElementById('surat_tgl') ? document.getElementById('surat_tgl').value : new Date().toISOString().split('T')[0];
+
+            const newArsip = {
+                id: Date.now(),
+                nomorSurat: noSurat,
+                jenisSurat: jenis,
+                penerima: namaSiswa,
+                tanggal: tglSurat
+            };
+
+            appData.arsip.unshift(newArsip);
+            saveLocal();
+            showToast('Surat berhasil disimpan ke Arsip Digital!', 'success');
+        }
+
+        function renderTableSuratMasuk() {
+            const tbody = document.getElementById('table-surat-masuk-body');
+            tbody.innerHTML = '';
+
+            if (appData.suratMasuk.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Belum ada data surat masuk. Klik tombol "+ Tambah Surat Masuk" untuk menambah.</td></tr>`;
+                return;
+            }
+
+            appData.suratMasuk.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                
+                const hasPdf = item.fileData && item.fileData.length > 0;
+                
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${index + 1}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${item.noBerkas}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tglDiterima}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-semibold text-blue-700">${item.nomorSurat}</td>
+                    <td class="py-3 px-4 font-medium">${item.pengirim}</td>
+                    <td class="py-3 px-4">${item.perihal}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="viewPdfSuratMasuk(${item.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${hasPdf ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}">
+                            <i class="fa-solid fa-file-pdf ${hasPdf ? 'text-rose-600' : 'text-slate-500'}"></i>
+                            <span>${hasPdf ? 'Lihat PDF' : 'Pratinjau'}</span>
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="viewPdfSuratMasuk(${item.id})" title="Pratinjau & Cetak Dokumen" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-print text-sm"></i>
+                            </button>
+                            <button onclick="editSuratMasuk(${item.id})" title="Edit Data Surat" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-pen-to-square text-sm"></i>
+                            </button>
+                            <button onclick="deleteSuratMasuk(${item.id})" title="Hapus Data" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function viewPdfSuratMasuk(id) {
+            const item = appData.suratMasuk.find(s => s.id === id);
+            if (!item) return;
+
+            currentViewingPdfData = item;
+
+            document.getElementById('pdf-modal-title').innerText = `Berkas Surat Masuk: ${item.fileName || 'Dokumen.pdf'}`;
+            document.getElementById('pdf-modal-subtitle').innerText = `Nomor Surat: ${item.nomorSurat} | Pengirim: ${item.pengirim}`;
+
+            const iframe = document.getElementById('pdf-frame-viewer');
+            const fallback = document.getElementById('pdf-fallback-container');
+            const downloadBtn = document.getElementById('pdf-download-btn');
+
+            if (item.fileData && item.fileData.startsWith('data:application/pdf')) {
+                iframe.src = item.fileData;
+                iframe.classList.remove('hidden');
+                fallback.classList.add('hidden');
+                downloadBtn.href = item.fileData;
+                downloadBtn.download = item.fileName || 'Surat_Masuk.pdf';
+                downloadBtn.classList.remove('hidden');
+            } else {
+                iframe.classList.add('hidden');
+                fallback.classList.remove('hidden');
+                downloadBtn.classList.add('hidden');
+
+                document.getElementById('fallback-sekolah-title').innerText = appData.profil.sekolah;
+                document.getElementById('fb-no-berkas').innerText = item.noBerkas;
+                document.getElementById('fb-tgl').innerText = item.tglDiterima;
+                document.getElementById('fb-no-surat').innerText = item.nomorSurat;
+                document.getElementById('fb-pengirim').innerText = item.pengirim;
+                document.getElementById('fb-perihal').innerText = item.perihal;
+            }
+
+            document.getElementById('modal-view-pdf').classList.remove('hidden');
+        }
+
+        function closeModalViewPdf() {
+            document.getElementById('modal-view-pdf').classList.add('hidden');
+            const iframe = document.getElementById('pdf-frame-viewer');
+            iframe.src = 'about:blank';
+            currentViewingPdfData = null;
+        }
+
+        function printPdfDocument() {
+            const iframe = document.getElementById('pdf-frame-viewer');
+            if (!iframe.classList.contains('hidden') && iframe.contentWindow) {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch(e) {
+                    window.print();
+                }
+            } else {
+                printFallbackDocument();
+            }
+        }
+
+        function printFallbackDocument() {
+            window.print();
+        }
+
+        function openModalSuratMasuk() {
+            document.getElementById('m_sm_id').value = '';
+            document.getElementById('m_sm_berkas').value = (appData.suratMasuk.length + 1).toString();
+            document.getElementById('m_sm_tgl').value = new Date().toISOString().split('T')[0];
+            document.getElementById('m_sm_nomor').value = '';
+            document.getElementById('m_sm_pengirim').value = '';
+            document.getElementById('m_sm_perihal').value = '';
+            document.getElementById('m_sm_file_pdf').value = '';
+            document.getElementById('m_sm_file_status').innerText = 'Pilih berkas dokumen berformat PDF (opsional)';
+            document.getElementById('modal-sm-title').innerText = 'Tambah Data Surat Masuk';
+            document.getElementById('modal-surat-masuk').classList.remove('hidden');
+        }
+
+        function closeModalSuratMasuk() {
+            document.getElementById('modal-surat-masuk').classList.add('hidden');
+        }
+
+        function editSuratMasuk(id) {
+            const item = appData.suratMasuk.find(s => s.id === id);
+            if (!item) return;
+
+            document.getElementById('m_sm_id').value = item.id;
+            document.getElementById('m_sm_berkas').value = item.noBerkas;
+            document.getElementById('m_sm_tgl').value = item.tglDiterima;
+            document.getElementById('m_sm_nomor').value = item.nomorSurat;
+            document.getElementById('m_sm_pengirim').value = item.pengirim;
+            document.getElementById('m_sm_perihal').value = item.perihal;
+            document.getElementById('m_sm_file_pdf').value = '';
+            document.getElementById('m_sm_file_status').innerText = item.fileName ? `File tersimpan: ${item.fileName}` : 'Pilih berkas dokumen berformat PDF (opsional)';
+            document.getElementById('modal-sm-title').innerText = 'Edit Data Surat Masuk';
+            document.getElementById('modal-surat-masuk').classList.remove('hidden');
+        }
+
+        function saveSuratMasukModal(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('m_sm_id').value;
+            const fileInput = document.getElementById('m_sm_file_pdf');
+
+            const noBerkas = document.getElementById('m_sm_berkas').value;
+            const tglDiterima = document.getElementById('m_sm_tgl').value;
+            const nomorSurat = document.getElementById('m_sm_nomor').value;
+            const pengirim = document.getElementById('m_sm_pengirim').value;
+            const perihal = document.getElementById('m_sm_perihal').value;
+
+            function processSave(fileName, fileData) {
+                if (idVal) {
+                    const idx = appData.suratMasuk.findIndex(s => s.id == idVal);
+                    if (idx !== -1) {
+                        appData.suratMasuk[idx].noBerkas = noBerkas;
+                        appData.suratMasuk[idx].tglDiterima = tglDiterima;
+                        appData.suratMasuk[idx].nomorSurat = nomorSurat;
+                        appData.suratMasuk[idx].pengirim = pengirim;
+                        appData.suratMasuk[idx].perihal = perihal;
+                        if (fileName) appData.suratMasuk[idx].fileName = fileName;
+                        if (fileData) appData.suratMasuk[idx].fileData = fileData;
+                    }
+                } else {
+                    const newItem = {
+                        id: Date.now(),
+                        noBerkas,
+                        tglDiterima,
+                        nomorSurat,
+                        pengirim,
+                        perihal,
+                        fileName: fileName || 'Surat_Masuk.pdf',
+                        fileData: fileData || ''
+                    };
+                    appData.suratMasuk.unshift(newItem);
+                }
+
+                saveLocal();
+                closeModalSuratMasuk();
+                renderTableSuratMasuk();
+                showToast('Data Surat Masuk berhasil disimpan!', 'success');
+            }
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    processSave(file.name, evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                processSave(null, null);
+            }
+        }
+
+        function deleteSuratMasuk(id) {
+            showConfirm('Hapus Surat Masuk', 'Apakah Anda yakin ingin menghapus data surat masuk ini?', () => {
+                appData.suratMasuk = appData.suratMasuk.filter(s => s.id !== id);
+                saveLocal();
+                renderTableSuratMasuk();
+                showToast('Surat Masuk berhasil dihapus.', 'info');
+            });
+        }
+
+        function exportSuratMasukCSV() {
+            let csv = 'NO BERKAS,TGL DITERIMA,NOMOR SURAT,PENGIRIM,PERIHAL\n';
+            appData.suratMasuk.forEach(s => {
+                csv += `"${s.noBerkas}","${s.tglDiterima}","${s.nomorSurat}","${s.pengirim}","${s.perihal}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Surat_Masuk_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('File CSV berhasil diunduh.', 'success');
+        }
+
+        function renderTableArsip() {
+            const tbody = document.getElementById('table-arsip-body');
+            tbody.innerHTML = '';
+
+            if (appData.arsip.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Belum ada arsip digital tersimpan.</td></tr>`;
+                return;
+            }
+
+            appData.arsip.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${index + 1}</td>
+                    <td class="py-3 px-4 font-mono font-semibold text-blue-700">${item.nomorSurat}</td>
+                    <td class="py-3 px-4 font-medium">${item.jenisSurat}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${item.penerima}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tanggal}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editArsip(${item.id})" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-pen-to-square text-sm"></i>
+                            </button>
+                            <button onclick="deleteArsip(${item.id})" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModalArsip() {
+            document.getElementById('m_arsip_id').value = '';
+            document.getElementById('m_arsip_nomor').value = '';
+            document.getElementById('m_arsip_jenis').value = '';
+            document.getElementById('m_arsip_penerima').value = '';
+            document.getElementById('m_arsip_tanggal').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-arsip-title').innerText = 'Tambah Data Arsip Digital';
+            document.getElementById('modal-arsip').classList.remove('hidden');
+        }
+
+        function closeModalArsip() {
+            document.getElementById('modal-arsip').classList.add('hidden');
+        }
+
+        function editArsip(id) {
+            const item = appData.arsip.find(a => a.id === id);
+            if (!item) return;
+
+            document.getElementById('m_arsip_id').value = item.id;
+            document.getElementById('m_arsip_nomor').value = item.nomorSurat;
+            document.getElementById('m_arsip_jenis').value = item.jenisSurat;
+            document.getElementById('m_arsip_penerima').value = item.penerima;
+            document.getElementById('m_arsip_tanggal').value = item.tanggal;
+            document.getElementById('modal-arsip-title').innerText = 'Edit Data Arsip Digital';
+            document.getElementById('modal-arsip').classList.remove('hidden');
+        }
+
+        function saveArsipModal(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('m_arsip_id').value;
+            const nomorSurat = document.getElementById('m_arsip_nomor').value;
+            const jenisSurat = document.getElementById('m_arsip_jenis').value;
+            const penerima = document.getElementById('m_arsip_penerima').value;
+            const tanggal = document.getElementById('m_arsip_tanggal').value;
+
+            if (idVal) {
+                const idx = appData.arsip.findIndex(a => a.id == idVal);
+                if (idx !== -1) {
+                    appData.arsip[idx] = { id: Number(idVal), nomorSurat, jenisSurat, penerima, tanggal };
+                }
+            } else {
+                appData.arsip.unshift({ id: Date.now(), nomorSurat, jenisSurat, penerima, tanggal });
+            }
+
+            saveLocal();
+            closeModalArsip();
+            renderTableArsip();
+            showToast('Arsip Digital berhasil disimpan!', 'success');
+        }
+
+        function deleteArsip(id) {
+            showConfirm('Hapus Data Arsip', 'Apakah Anda yakin ingin menghapus data arsip ini?', () => {
+                appData.arsip = appData.arsip.filter(a => a.id !== id);
+                saveLocal();
+                renderTableArsip();
+                showToast('Arsip berhasil dihapus.', 'info');
+            });
+        }
+
+        function renderTablePegawai() {
+            const tbody = document.getElementById('table-pegawai-body');
+            tbody.innerHTML = '';
+
+            if (appData.pegawai.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Belum ada data pegawai.</td></tr>`;
+                return;
+            }
+
+            appData.pegawai.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${item.nama}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${item.nip}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${item.nik}</td>
+                    <td class="py-3 px-4 font-medium text-slate-700">${item.jabatan}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editPegawai(${item.id})" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-pen-to-square text-sm"></i>
+                            </button>
+                            <button onclick="deletePegawai(${item.id})" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModalPegawai() {
+            document.getElementById('m_peg_id').value = '';
+            document.getElementById('m_peg_nama').value = '';
+            document.getElementById('m_peg_nip').value = '';
+            document.getElementById('m_peg_nik').value = '';
+            document.getElementById('m_peg_jabatan').value = '';
+            document.getElementById('modal-pegawai-title').innerText = 'Tambah Master Data Pegawai';
+            document.getElementById('modal-pegawai').classList.remove('hidden');
+        }
+
+        function closeModalPegawai() {
+            document.getElementById('modal-pegawai').classList.add('hidden');
+        }
+
+        function editPegawai(id) {
+            const item = appData.pegawai.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById('m_peg_id').value = item.id;
+            document.getElementById('m_peg_nama').value = item.nama;
+            document.getElementById('m_peg_nip').value = item.nip;
+            document.getElementById('m_peg_nik').value = item.nik;
+            document.getElementById('m_peg_jabatan').value = item.jabatan;
+            document.getElementById('modal-pegawai-title').innerText = 'Edit Master Data Pegawai';
+            document.getElementById('modal-pegawai').classList.remove('hidden');
+        }
+
+        function savePegawaiModal(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('m_peg_id').value;
+            const nama = document.getElementById('m_peg_nama').value;
+            const nip = document.getElementById('m_peg_nip').value;
+            const nik = document.getElementById('m_peg_nik').value;
+            const jabatan = document.getElementById('m_peg_jabatan').value;
+
+            if (idVal) {
+                const idx = appData.pegawai.findIndex(p => p.id == idVal);
+                if (idx !== -1) {
+                    appData.pegawai[idx] = { id: Number(idVal), nama, nip, nik, jabatan };
+                }
+            } else {
+                appData.pegawai.push({ id: Date.now(), nama, nip, nik, jabatan });
+            }
+
+            saveLocal();
+            closeModalPegawai();
+            renderTablePegawai();
+            showToast('Data Pegawai berhasil disimpan!', 'success');
+        }
+
+        function deletePegawai(id) {
+            showConfirm('Hapus Data Pegawai', 'Apakah Anda yakin ingin menghapus data pegawai ini?', () => {
+                appData.pegawai = appData.pegawai.filter(p => p.id !== id);
+                saveLocal();
+                renderTablePegawai();
+                showToast('Data pegawai dihapus.', 'info');
+            });
+        }
+
+        function openGasModal() {
+            document.getElementById('gas-url-input').value = appData.gasUrl || '';
+            document.getElementById('modal-gas').classList.remove('hidden');
+        }
+
+        function closeGasModal() {
+            document.getElementById('modal-gas').classList.add('hidden');
+        }
+
+        function saveGasUrl() {
+            const url = document.getElementById('gas-url-input').value.trim();
+            appData.gasUrl = url;
+            saveLocal();
+            closeGasModal();
+
+            if (url) {
+                document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                document.getElementById('status-text').innerText = 'Terhubung ke Apps Script';
+                showToast('URL Google Apps Script berhasil disimpan & terhubung!', 'success');
+            } else {
+                document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+                document.getElementById('status-text').innerText = 'Lokal (Klik hubungkan Apps Script)';
+                showToast('Aplikasi berjalan dalam mode Lokal.', 'info');
+            }
+        }
+
+        function copyGasCode() {
+            const code = document.getElementById('gas-code-text').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Kode Google Apps Script berhasil disalin!', 'success');
+        }
+
+        function testGasConnection() {
+            const url = document.getElementById('gas-url-input').value.trim();
+            if (!url) {
+                showToast('Masukkan URL Apps Script terlebih dahulu.', 'warning');
+                return;
+            }
+
+            showToast('Menguji koneksi...', 'info');
+            fetch(`${url}?action=getAllData`)
+                .then(res => res.json())
+                .then(data => {
+                    showToast('Koneksi Google Apps Script BERHASIL!', 'success');
+                })
+                .catch(err => {
+                    showToast('Gagal terhubung ke URL Apps Script.', 'error');
+                });
+        }
+
+        function syncToGasBackend() {
+            if (!appData.gasUrl) return;
+
+            const payload = {
+                action: 'saveAllData',
+                payload: appData
+            };
+
+            fetch(appData.gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+        }
+
+        function checkAppUpdates() {
+            showToast('Aplikasi SIMAS Desktop V.1.0 sudah menggunakan versi terbaru (2026.08.11-STABLE).', 'success');
+        }
+
+        function openAboutModal() {
+            document.getElementById('modal-about').classList.remove('hidden');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('modal-about').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            startLiveClock();
+            updateDashboardCounters();
+
+            if (appData.gasUrl) {
+                document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                document.getElementById('status-text').innerText = 'Terhubung ke Apps Script';
+            }
+
+            renderProfilForm();
+            renderTableSuratMasuk();
+            renderTableArsip();
+            renderTablePegawai();
+        };
+    </script>
+</body>
+</html>
